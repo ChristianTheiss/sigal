@@ -42,6 +42,7 @@ _DEFAULT_CONFIG = {
     'google_tag_manager': '',
     'ignore_directories': [],
     'ignore_files': [],
+    'ignore_live_photos': True,
     'img_processor': 'ResizeToFit',
     'img_size': (640, 480),
     'index_in_url': False,

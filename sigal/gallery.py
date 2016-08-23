@@ -544,6 +544,21 @@ class Gallery(object):
                 self.logger.info('Ignoring %s', relpath)
                 continue
 
+            if settings['ignore_live_photos']:
+                filesnew=[]
+                for f in files:
+                    base, ext = splitext(f)
+                    add=1
+                    if ext.lower() in Video.extensions:
+                        for g in files:
+                            ibase, iext = splitext(g)
+                            if iext.lower() in Image.extensions and base == ibase:
+                                self.logger.info('%s is a video file of a live photo, ignoring it',f)
+                                add=0
+                    if add:
+                        filesnew.append(f)
+                files=filesnew
+
             # Remove files that match the ignore_files settings
             if ignore_files:
                 files_path = {join(relpath, f) for f in files}
