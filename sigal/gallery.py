@@ -41,7 +41,7 @@ from os.path import isfile, join, splitext
 from . import image, video, signals
 from .compat import PY2, UnicodeMixin, strxfrm, url_quote, text_type, pickle
 from .image import process_image, get_exif_tags, get_exif_data, get_size
-from .settings import get_thumb
+from .settings import get_thumb, get_original
 from .utils import (Devnull, copy, check_or_create_dir, url_from_path,
                     read_markdown, cached_property, is_valid_html5_video,
                     get_mime)
@@ -78,6 +78,9 @@ class Media(UnicodeMixin):
 
         self.thumb_name = get_thumb(self.settings, self.filename)
         self.thumb_path = join(settings['destination'], path, self.thumb_name)
+
+        self.original_name = get_original(self.settings, self.filename)
+        self.original_path = join(settings['destination'], path, self.original_name)
 
         self.logger = logging.getLogger(__name__)
         self._get_metadata()
@@ -127,6 +130,14 @@ class Media(UnicodeMixin):
                 self.logger.error('Failed to generate thumbnail: %s', e)
                 return
         return url_from_path(self.thumb_name)
+
+    @property
+    def original(self):
+        """Path to the symlinked original file (relative to the album directory)."""
+
+        if self.settings['symlink_originals']:
+            return url_from_path(self.original_name)
+        return url_from_path(self.filename)
 
     def _get_metadata(self):
         """ Get image metadata from filename.md: title, description, meta."""
@@ -306,6 +317,10 @@ class Album(UnicodeMixin):
         if self.medias:
             check_or_create_dir(join(self.dst_path,
                                      self.settings['thumb_dir']))
+
+        if self.medias and self.settings['symlink_originals']:
+            check_or_create_dir(join(self.dst_path,
+                                     self.settings['originals_dir']))
 
         if self.medias and self.settings['keep_orig']:
             self.orig_path = join(self.dst_path, self.settings['orig_dir'])

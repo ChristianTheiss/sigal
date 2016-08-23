@@ -30,7 +30,7 @@ import shutil
 from os.path import splitext
 
 from . import image, utils
-from .settings import get_thumb, Status
+from .settings import get_thumb, get_original, Status
 from .utils import call_subprocess, is_valid_html5_video
 
 
@@ -186,5 +186,10 @@ def process_video(filepath, outpath, settings):
                 raise
             else:
                 return Status.FAILURE
+
+    if settings['symlink_originals']:
+        symlink_name = os.path.join(outpath, get_original(settings, filename))
+        logger.info('Symlinking %s to %s', filepath, symlink_name)
+        utils.copy(filepath, symlink_name, True)
 
     return Status.SUCCESS

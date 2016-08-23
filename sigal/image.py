@@ -47,7 +47,7 @@ from pilkit.processors import Transpose
 from pilkit.utils import save_image
 
 from . import compat, signals, utils
-from .settings import get_thumb, Status
+from .settings import get_thumb, get_original, Status
 
 
 def _has_exif_tags(img):
@@ -157,6 +157,11 @@ def process_image(filepath, outpath, settings):
             generate_thumbnail(outname, thumb_name, settings['thumb_size'],
                                settings['thumb_video_delay'],
                                fit=settings['thumb_fit'], options=options)
+        if settings['symlink_originals']:
+            symlink_name = os.path.join(outpath, get_original(settings, filename))
+            logger.info('Symlinking %s to %s', filepath, symlink_name)
+            utils.copy(filepath, symlink_name, True)
+
     except Exception as e:
         logger.info('Failed to process: %r', e)
         if logger.getEffectiveLevel() == logging.DEBUG:

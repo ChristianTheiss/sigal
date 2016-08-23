@@ -67,6 +67,10 @@ _DEFAULT_CONFIG = {
     'thumb_size': (200, 150),
     'thumb_suffix': '',
     'thumb_video_delay': '0',
+    'symlink_originals': False,
+    'originals_dir': 'originals',
+    'originals_prefix': '',
+    'originals_suffix': '',
     'title': '',
     'use_assets_cdn': True,
     'use_orig': False,
@@ -109,6 +113,28 @@ def get_thumb(settings, filename):
         ext = '.jpg'
     return join(path, settings['thumb_dir'], settings['thumb_prefix'] +
                 name + settings['thumb_suffix'] + ext)
+
+
+def get_original(settings, filename):
+    """Return the path to the originals symlink.
+
+    examples:
+    >>> default_settings = create_settings()
+    >>> get_original(default_settings, "bar/foo.jpg")
+    "bar/originals/foo.jpg"
+    >>> get_original(default_settings, "bar/foo.png")
+    "bar/originals/foo.png"
+
+    for videos, it returns a video file:
+    >>> get_original(default_settings, "bar/foo.webm")
+    "bar/originals/foo.webm"
+    """
+
+    path, filen = os.path.split(filename)
+    name, ext = os.path.splitext(filen)
+
+    return join(path, settings['originals_dir'], settings['originals_prefix'] +
+                name + settings['originals_suffix'] + ext)
 
 
 def read_settings(filename=None):
