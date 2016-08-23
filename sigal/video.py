@@ -230,13 +230,13 @@ def process_video(filepath, outpath, settings):
                 return Status.FAILURE
 
     previewname = outname+'.preview.jpg'
-        try:
-            generate_preview(outname, previewname, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
-        except Exception:
-            if logger.getEffectiveLevel() == logging.DEBUG:
-                raise
-            else:
-                return Status.FAILURE
+    try:
+        generate_preview(outname, previewname, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
+    except Exception:
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            raise
+        else:
+            return Status.FAILURE
 
     if settings['symlink_originals']:
         symlink_name = os.path.join(outpath, get_original(settings, filename))
