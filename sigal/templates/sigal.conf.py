@@ -138,6 +138,9 @@ thumb_size = (280, 210)
 ignore_directories = []
 ignore_files = []
 
+# Ignore video files of iOS live photos.
+# ignore_live_photos = True
+
 # -------------
 # Video options
 # -------------
