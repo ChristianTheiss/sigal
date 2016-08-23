@@ -79,6 +79,36 @@ def video_size(source):
     return x, y
 
 
+def get_vsize(file_path):
+    """Return video size (width and height)."""
+    width, height = video_size(file_path)
+    return {
+        'width': width,
+        'height': height
+    }
+
+
+def get_video_length(source):
+    """Return video length."""
+    ret, stdout, stderr = call_subprocess(['ffmpeg', '-i', source])
+    pattern = re.compile(r'Duration: ([0-9]+:[0-9]+:[0-9]+)')
+    match = pattern.search(stderr)
+
+    if match:
+        x = match.groups()[0]
+    else:
+        x = "00:00:00"
+
+    if "00:0" in x[:4]:
+        x = x[4:]
+    elif "00:" in x[:3]:
+        x = x[3:]
+    elif "0" in x[:1]:
+        x = x[1:]
+
+    return x
+
+
 def generate_video(source, outname, settings, options=None):
     """Video processor.
 
@@ -145,6 +175,18 @@ def generate_thumbnail(source, outname, box, delay, fit=True, options=None):
     os.unlink(tmpfile)
 
 
+def generate_preview(source, outname, delay, settings, options=None):
+    """Create a preview image for the video source, based on ffmpeg."""
+
+    logger = logging.getLogger(__name__)
+
+    # dump an image of the video
+    cmd = ['ffmpeg', '-i', source, '-an', '-r', '1',
+           '-ss', delay, '-vframes', '1', '-y', outname]
+    logger.debug('Create thumbnail for video: %s', ' '.join(cmd))
+    check_subprocess(cmd, source, outname)
+
+
 def process_video(filepath, outpath, settings):
     """Process a video: resize, create thumbnail."""
 
@@ -181,6 +223,15 @@ def process_video(filepath, outpath, settings):
                 outname, thumb_name, settings['thumb_size'],
                 settings['thumb_video_delay'], fit=settings['thumb_fit'],
                 options=settings['jpg_options'])
+        except Exception:
+            if logger.getEffectiveLevel() == logging.DEBUG:
+                raise
+            else:
+                return Status.FAILURE
+
+    previewname = outname+'.preview.jpg'
+        try:
+            generate_preview(outname, previewname, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
         except Exception:
             if logger.getEffectiveLevel() == logging.DEBUG:
                 raise

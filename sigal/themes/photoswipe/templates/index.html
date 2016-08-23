@@ -113,14 +113,25 @@
 			<div class="gallery" itemscope itemtype="http://schema.org/ImageGallery">
 				{% for media in album.medias %}
 				  {% set media_title = media.title if media.title else media.filename %}
-					    {% if media.type == "image" %}
-							    <figure class="gallery__img--secondary thumbnail" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
-									<a href="{{ media.filename }}" itemprop="contentUrl" data-size="{{media.size.width}}x{{media.size.height}}">
-									<img src="{{ theme.url }}/echo/blank.gif" data-echo="{{ media.thumbnail }}" alt="{{ media.filename }}" itemprop="thumbnail" title="{{ media.exif.datetime }}" />
-									</a>
-									<figcaption itemprop="caption description">{{ media_title }} - {{ media.exif.datetime }}</figcaption>
-							    </figure>
-					    {% endif %}
+					{% if media.type == "image" %}
+							<figure class="gallery__img--secondary thumbnail" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+								<a href="{{ media.filename }}" itemprop="contentUrl" data-size="{{media.size.width}}x{{media.size.height}}" original="{{ media.original }}">
+								<img src="{{ theme.url }}/echo/blank.gif" data-echo="{{ media.thumbnail }}" alt="{{ media.filename }}" itemprop="thumbnail" title="{{ media.exif.datetime }}" />
+								</a>
+								<figcaption itemprop="caption description">{{ media_title }} - {{ media.exif.datetime }}</figcaption>
+							</figure>
+					{% endif %}
+					{% if media.type == "video" %}
+						<figure class="gallery__img--secondary thumbnail" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+							<a href="{{ media.filename }}.preview.jpg" itemprop="contentUrl" data-size="{{media.size.width}}x{{media.size.height}}" original="{{ media.original }}">
+							<div class="videoThumb">
+								<img src="{{ theme.url }}/echo/blank.gif" data-echo="{{ media.thumbnail }}" alt="{{ media.filename }}" itemprop="thumbnail" style="position: relative; top: 0; left: 0;" />
+								<div class="videoBar"><img class="videoIcon" src="{{ theme.url }}/videoIcon.png" /><vt class="videoText">{{ media.video_length }}</vt></div>
+							</div>
+							</a>
+							<figcaption itemprop="caption description">{{ media_title }}</figcaption>
+						</figure>
+					{% endif %}
 				{% endfor %}
 			</div>
 		{% endif %}
@@ -401,7 +412,92 @@
 	        // Pass data to PhotoSwipe and initialize it
 	        gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
 	        gallery.init();
+
+	        gallery.listen('afterChange', function() {
+	            detectVideo(gallery);
+	        });
+
+	        gallery.listen('beforeChange', function() {
+	            removeVideo();
+	        });
+
+	        gallery.listen('resize', function() { 
+	            if ($('.videoHolder').length > 0) updateVideoPosition(gallery);
+	        });
+
+	        gallery.listen('close', function() {
+	            removeVideo();
+	        });
+
+	        detectVideo(gallery);
 	    };
+
+    function removeVideo() {
+        if ($('.videoHolder').length > 0) {
+            if ($('#video').length > 0) {
+                $('video')[0].pause();
+                $('video')[0].src = "";
+                $('.videoHolder').remove();
+                $('.pswp__img').css('visibility','visible');
+            } else {
+                $('.videoHolder').remove();
+            }
+        }
+    }
+
+    function detectVideo(gallery) {
+        var src = gallery.currItem.title;
+        if (src.indexOf('mp4')>= 0) {
+            addVideo(gallery.currItem);
+            updateVideoPosition(gallery);
+        }
+    }
+    var startx = 0;
+    var starty = 0;
+
+    function addVideo(item, vp) {
+        var videofile = item.src.split(".");
+        var v = $('<div />', {
+                    class:'videoHolder',
+                    css : ({'position': 'absolute','width':item.w, 'height':item.h})
+
+        });
+        v.one('click', (function() {
+            var playerCode = '<video id="video" width="'+item.w+'" height="'+item.h+'" autoplay controls>' +
+            '<source src="'+item.title+'" type="video/mp4"></source>' +
+            '</video>';
+             $(this).html(playerCode);
+             $('.pswp__img').css('visibility','hidden');
+        }));
+        v.one('touchstart', (function(evt) {
+           var e = evt.changedTouches[0];
+           startx = e.pageX;
+           starty = e.pageY;
+        }));
+
+        v.one('touchend', (function(evt) {
+           var e = evt.changedTouches[0];
+           var diffx = (startx - e.pageX);
+           var diffy = (starty - e.pageY);
+           if (diffx < 0) diffx *= -1;
+           if (diffy < 0) diffy *= -1;
+           if ( (diffx < 20) && (diffy < 20) ) {
+              var playerCode = '<video id="video" width="'+item.w+'" height="'+item.h+'" autoplay controls>' +
+              '<source src="'+item.title+'" type="video/mp4"></source>' +
+              '</video>';
+               $(this).html(playerCode);
+               $('.pswp__img').css('visibility','hidden');
+           }
+        }));
+        v.appendTo('.pswp__scroll-wrap');
+    }
+    function updateVideoPosition(o) {
+        var item = o.currItem;
+        var vp = o.viewportSize;
+        var top = (vp.y - item.h)/2;
+        var left = (vp.x - item.w)/2;
+        $('.videoHolder').css({position:'absolute',top:top, left:left});
+    }
 
 	    // loop through all gallery elements and bind events
 	    var galleryElements = document.querySelectorAll( gallerySelector );
