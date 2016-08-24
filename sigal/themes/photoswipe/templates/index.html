@@ -67,30 +67,24 @@
   </head>
   <body>
   <div class="container">
-	<h1><a href="{{ album.index_url }}">{{ index_title }}</a></h1>
-
-	{% if settings.links %}
-    <div class="menu">
-      <ul>
-        {% for title, link in settings.links %}
-        	<li><a href="{{ link }}">{{ title }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
 	{% block content %}
 
         <div class="content">
-			{% if album.breadcrumb %}
-		    <div class="breadcrumb">
-			    <h2>
-			      {% for url, title in album.breadcrumb %}
-			      <a href="{{ url }}">{{ title }}</a>{% if not loop.last %} » {% endif %}
-			      {% endfor -%}
-			    </h2>
-		    </div>
-		    {% endif %}
+          <div class="breadcrumb">
+            <h2><a href="{{ album.index_url }}">{{ index_title }}</a> » 
+
+	{% if settings.links %}
+		{% for title, link in settings.links %}
+              <a href="{{ link }}">{{ title }}</a> » 
+        {% endfor %}
+    {% endif %}
+	{% if album.breadcrumb %}
+		{% for url, title in album.breadcrumb %}
+              <a href="{{ url }}">{{ title }}</a>{% if not loop.last %} » {% endif %}
+		{% endfor -%}
+            </h2>
+	{% endif %}
+          </div>
 
 		  	{% if album.albums %}
 		  		<div class="album-list">
