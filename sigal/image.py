@@ -45,6 +45,7 @@ from PIL import Image as PILImage
 from PIL import ImageOps
 from pilkit.processors import Transpose
 from pilkit.utils import save_image
+from os.path import isfile
 
 from . import compat, signals, utils
 from .settings import get_thumb, get_original, Status
@@ -133,11 +134,10 @@ def generate_thumbnail(source, outname, box, delay, fit=True, options=None):
     save_image(img, outname, outformat, options=options, autoconvert=True)
 
 
-def process_image(filepath, outpath, settings):
+def process_image(filepath, outpath, settings, force):
     """Process one image: resize, create thumbnail."""
-
     logger = logging.getLogger(__name__)
-    logger.info('Processing %s', filepath)
+
     filename = os.path.split(filepath)[1]
     outname = os.path.join(outpath, filename)
     ext = os.path.splitext(filename)[1]
@@ -150,17 +150,23 @@ def process_image(filepath, outpath, settings):
         options = {}
 
     try:
-        generate_image(filepath, outname, settings, options=options)
+        if not isfile(outname) or force:
+            logger.info('Resizing image %s', filepath)
+            generate_image(filepath, outname, settings, options=options)
 
         if settings['make_thumbs']:
             thumb_name = os.path.join(outpath, get_thumb(settings, filename))
-            generate_thumbnail(outname, thumb_name, settings['thumb_size'],
-                               settings['thumb_video_delay'],
-                               fit=settings['thumb_fit'], options=options)
+
+            if not isfile(thumb_name) or force:
+                logger.info('Generating thumnail for image %s', filepath)
+                generate_thumbnail(outname, thumb_name, settings['thumb_size'],
+                                   settings['thumb_video_delay'],
+                                   fit=settings['thumb_fit'], options=options)
         if settings['symlink_originals']:
             symlink_name = os.path.join(outpath, get_original(settings, filename))
-            logger.info('Symlinking %s to %s', filepath, symlink_name)
-            utils.copy(filepath, symlink_name, True)
+            if not isfile(symlink_name) or force:
+                logger.info('Symlinking image %s to %s', filepath, symlink_name)
+                utils.copy(filepath, symlink_name, True)
 
     except Exception as e:
         logger.info('Failed to process: %r', e)

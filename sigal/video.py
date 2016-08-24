@@ -27,7 +27,7 @@ import logging
 import os
 import re
 import shutil
-from os.path import splitext
+from os.path import isfile,splitext
 
 from . import image, utils
 from .settings import get_thumb, get_original, Status
@@ -187,7 +187,7 @@ def generate_preview(source, outname, delay, settings, options=None):
     check_subprocess(cmd, source, outname)
 
 
-def process_video(filepath, outpath, settings):
+def process_video(filepath, outpath, settings, force):
     """Process a video: resize, create thumbnail."""
 
     logger = logging.getLogger(__name__)
@@ -197,7 +197,9 @@ def process_video(filepath, outpath, settings):
     try:
         if settings['use_orig'] and is_valid_html5_video(ext):
             outname = os.path.join(outpath, filename)
-            utils.copy(filepath, outname, symlink=settings['orig_link'])
+            if not isfile(outname) or force:
+                logger.info('Copying video %s', filepath)
+                utils.copy(filepath, outname, symlink=settings['orig_link'])
         else:
             valid_formats = ['mp4', 'webm']
             video_format = settings['video_format']
@@ -208,8 +210,10 @@ def process_video(filepath, outpath, settings):
                 raise ValueError
 
             outname = os.path.join(outpath, basename + '.' + video_format)
-            generate_video(filepath, outname, settings,
-                           options=settings.get(video_format + '_options'))
+            if not isfile(outname) or force:
+                logger.info('Generating video %s', filepath)
+                generate_video(filepath, outname, settings,
+                               options=settings.get(video_format + '_options'))
     except Exception:
         if logger.getEffectiveLevel() == logging.DEBUG:
             raise
@@ -218,29 +222,37 @@ def process_video(filepath, outpath, settings):
 
     if settings['make_thumbs']:
         thumb_name = os.path.join(outpath, get_thumb(settings, filename))
-        try:
-            generate_thumbnail(
-                outname, thumb_name, settings['thumb_size'],
-                settings['thumb_video_delay'], fit=settings['thumb_fit'],
-                options=settings['jpg_options'])
-        except Exception:
-            if logger.getEffectiveLevel() == logging.DEBUG:
-                raise
-            else:
-                return Status.FAILURE
+        if not isfile(thumb_name) or force:
+            logger.info('Generating thumbnail for video %s', filepath)
 
-    previewname = outname+'.preview.jpg'
-    try:
-        generate_preview(outname, previewname, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
-    except Exception:
-        if logger.getEffectiveLevel() == logging.DEBUG:
-            raise
-        else:
-            return Status.FAILURE
+            try:
+                generate_thumbnail(
+                    outname, thumb_name, settings['thumb_size'],
+                    settings['thumb_video_delay'], fit=settings['thumb_fit'],
+                    options=settings['jpg_options'])
+            except Exception:
+                if logger.getEffectiveLevel() == logging.DEBUG:
+                    raise
+                else:
+                    return Status.FAILURE
+
+    if settings['video_previmage']:
+        preview_name = outname+'.preview.jpg'
+        if not isfile(preview_name) or force:
+            logger.info('Generating preview image for video %s', filepath)
+
+            try:
+                generate_preview(outname, preview_name, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
+            except Exception:
+                if logger.getEffectiveLevel() == logging.DEBUG:
+                    raise
+                else:
+                    return Status.FAILURE
 
     if settings['symlink_originals']:
         symlink_name = os.path.join(outpath, get_original(settings, filename))
-        logger.info('Symlinking %s to %s', filepath, symlink_name)
-        utils.copy(filepath, symlink_name, True)
+        if not isfile(symlink_name) or force:
+            logger.info('Symlinking video %s to %s', filepath, symlink_name)
+            utils.copy(filepath, symlink_name, True)
 
     return Status.SUCCESS

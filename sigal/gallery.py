@@ -723,17 +723,13 @@ class Gallery(object):
     def process_dir(self, album, force=False):
         """Process a list of images in a directory."""
         for f in album:
-            if isfile(f.dst_path) and not force:
-                self.logger.info("%s exists - skipping", f.filename)
-                self.stats[f.type + '_skipped'] += 1
-            else:
-                self.stats[f.type] += 1
-                yield (f.type, f.path, f.filename, f.src_path, album.dst_path,
-                       self.settings)
+            self.stats[f.type] += 1
+            yield (f.type, f.path, f.filename, f.src_path, album.dst_path,
+                   self.settings, force)
 
 
 def process_file(args):
-    # args => ftype, path, filename, src_path, dst_path, settings
+    # args => ftype, path, filename, src_path, dst_path, settings, force
     processor = process_image if args[0] == 'image' else process_video
     ret = processor(*args[3:])
     # If the processor return an error (ret != 0), then we return the path and
