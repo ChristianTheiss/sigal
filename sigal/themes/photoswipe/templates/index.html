@@ -71,13 +71,14 @@
 
         <div class="content">
           <div class="breadcrumb">
-            <h2><a href="{{ album.index_url }}">{{ index_title }}</a> » 
-
+            <h2>
 	{% if settings.links %}
 		{% for title, link in settings.links %}
               <a href="{{ link }}">{{ title }}</a> » 
-        {% endfor %}
-    {% endif %}
+		{% endfor %}
+	{% endif %}
+              <a href="{{ album.index_url }}">{{ index_title }}</a> » 
+
 	{% if album.breadcrumb %}
 		{% for url, title in album.breadcrumb %}
               <a href="{{ url }}">{{ title }}</a>{% if not loop.last %} » {% endif %}
