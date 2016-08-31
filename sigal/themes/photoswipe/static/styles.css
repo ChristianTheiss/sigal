@@ -21,6 +21,12 @@ figure {
   max-width: 25%;
 }
 
+img.album_thumb
+{
+  float: left;
+  height: 100%;
+}
+
 a {
   color: #3169B3;
 }
@@ -115,7 +121,6 @@ figcaption {
 }
 .thumbnail img {
   max-width: 100%;
-  height: auto;
   margin: 0;
    border-left: 0px;
    border-right: 1px solid #fff;
@@ -131,6 +136,8 @@ figcaption {
 
 .album_title {
   display: block;
+  float:left;
+  padding: 90px 10px;
 }
 
 .video {
@@ -206,6 +213,12 @@ figcaption {
   width:160px;
 }
 
+.menu-img.thumbnail {
+  width: 100%;
+  text-align: left;
+  float: left;
+}
+
 .gallery__title {
   line-height: 14px;
   font-size: 14px;
@@ -264,11 +277,16 @@ and (min-device-width : 320px)
 and (max-device-width : 568px)
 and (orientation : landscape) {
   .menu-img,
+  .thumbnail img,
   .gallery__img--secondary {
     width: 81px;
   }
   .gallery__img--secondary a img{
    width: 80px;
+  }
+  .album_title {
+    padding: 27px 0px 0px 2px;
+    font-size: 14px;
   }
   vt.videoText { font-size: 12px; top: 30%; }
 }
@@ -279,11 +297,16 @@ and (min-device-width : 320px)
 and (max-device-width : 568px)
 and (orientation : portrait) {
   .menu-img,
+  .thumbnail img,
   .gallery__img--secondary {
     width: 80px;
   }
   .gallery__img--secondary a img{
    width: 79px;
+  }
+  .album_title {
+    padding: 27px 0px 0px 2px;
+    font-size: 14px;
   }
   vt.videoText { font-size: 12px; top: 30%; }
 }
@@ -300,6 +323,10 @@ and (orientation : landscape) {
   .gallery__img--secondary a img{
    width: 94px;
   }
+  .album_title {
+    padding: 39px 0px 0px 2px;
+    font-size: 16px;
+  }
   vt.videoText { font-size: 14px; top: 30%; }
 }
 
@@ -315,5 +342,48 @@ and (orientation : portrait) {
   .gallery__img--secondary a img{
    width: 93px;
   }
+  .album_title {
+    padding: 39px 0px 0px 2px;
+    font-size: 16px;
+  }
   vt.videoText { font-size: 14px; top: 30%; }
 }
+
+/* iPad in landscape */
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : landscape) {
+  .menu-img,
+  .gallery__img--secondary {
+    width: 93px;
+  }
+  .gallery__img--secondary a img{
+   width: 92px;
+  }
+  .album_title {
+    padding: 38px 0px 0px 5px;
+    font-size: 16px;
+  }
+  vt.videoText { font-size: 14px; top: 30%; }
+}
+
+/* iPad in portrait */
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : portrait) {
+  .menu-img,
+  .gallery__img--secondary {
+    width: 96px;
+  }
+  .gallery__img--secondary a img{
+   width: 95px;
+  }
+  .album_title {
+    padding: 38px 0px 0px 5px;
+    font-size: 16px;
+  }
+  vt.videoText { font-size: 14px; top: 30%; }
+}
+

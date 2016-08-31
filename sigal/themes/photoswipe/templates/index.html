@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no">
 
     <!-- non-retina iPhone vor iOS 7 -->
     <link rel="apple-touch-icon" href="{{ theme.url }}/icon57.png" sizes="57x57">
@@ -87,17 +88,18 @@
 	{% endif %}
           </div>
 
-		  	{% if album.albums %}
-		  		<div class="album-list">
+			{% if album.albums %}
+				<div class="album-list">
 				{% for alb in album.albums %}
-			    	<div class="menu-img thumbnail">
-			        	<a href="{{ alb.url }}">
-			          	<img src="{{ alb.thumbnail }}" class="album_thumb" alt="{{ alb.title }}" title="{{ alb.title }}" /></a>
-			        	<span class="album_title">{{ alb.title }}</span>
-			      </div>
+					<a href="{{ alb.url }}">
+						<div class="menu-img thumbnail">
+							<img src="{{ alb.thumbnail }}" class="album_thumb" alt="{{ alb.title }}" title="{{ alb.title }}" />
+							<span class="album_title">{{ alb.title }}</span>
+						</div>
+					</a>
 				{% endfor %}
 				</div>
-		  	{% endif %}
+			{% endif %}
 
 		{% if album.zip %}
 		<div class="additionnal-infos">
