@@ -149,7 +149,7 @@ def generate_thumbnail(source, outname, box, delay, fit=True, options=None):
     save_image(img, outname, outformat, options=options, autoconvert=True)
 
 
-def process_image(filepath, outpath, settings):
+def process_image(filepath, outpath, settings, force):
     """Process one image: resize, create thumbnail."""
 
     logger = logging.getLogger(__name__)
@@ -166,13 +166,18 @@ def process_image(filepath, outpath, settings):
         options = {}
 
     try:
-        generate_image(filepath, outname, settings, options=options)
+        if not isfile(outname) or force:
+            logger.info('Resizing image %s', filepath)
+            generate_image(filepath, outname, settings, options=options)
 
         if settings['make_thumbs']:
             thumb_name = os.path.join(outpath, get_thumb(settings, filename))
-            generate_thumbnail(outname, thumb_name, settings['thumb_size'],
-                               settings['thumb_video_delay'],
-                               fit=settings['thumb_fit'], options=options)
+
+            if not isfile(thumb_name) or force:
+                logger.info('Generating thumnail for image %s', filepath)
+                generate_thumbnail(outname, thumb_name, settings['thumb_size'],
+                                   settings['thumb_video_delay'],
+                                   fit=settings['thumb_fit'], options=options)
         if settings['symlink_originals']:
             symlink_name = os.path.join(outpath, get_original(settings, filename))
             if not isfile(symlink_name) or force:

@@ -747,11 +747,11 @@ class Gallery(object):
             else:
                 self.stats[f.type] += 1
                 yield (f.type, f.path, f.filename, f.src_path, album.dst_path,
-                       self.settings)
+                       self.settings, force)
 
 
 def process_file(args):
-    # args => ftype, path, filename, src_path, dst_path, settings
+    # args => ftype, path, filename, src_path, dst_path, settings, force
     processor = process_image if args[0] == 'image' else process_video
     ret = processor(*args[3:])
     # If the processor return an error (ret != 0), then we return the path and
