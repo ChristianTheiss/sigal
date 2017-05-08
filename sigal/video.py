@@ -175,6 +175,18 @@ def generate_thumbnail(source, outname, box, delay, fit=True, options=None):
     os.unlink(tmpfile)
 
 
+def generate_preview(source, outname, delay, settings, options=None):
+    """Create a preview image for the video source, based on ffmpeg."""
+
+    logger = logging.getLogger(__name__)
+
+    # dump an image of the video
+    cmd = ['ffmpeg', '-i', source, '-an', '-r', '1',
+           '-ss', delay, '-vframes', '1', '-y', outname]
+    logger.debug('Create thumbnail for video: %s', ' '.join(cmd))
+    check_subprocess(cmd, source, outname)
+
+
 def process_video(filepath, outpath, settings):
     """Process a video: resize, create thumbnail."""
 
@@ -216,6 +228,19 @@ def process_video(filepath, outpath, settings):
                 raise
             else:
                 return Status.FAILURE
+    if settings['video_previmage']:
+        preview_name = outname+'.preview.jpg'
+        if not isfile(preview_name) or force:
+            logger.info('Generating preview image for video %s', filepath)
+
+            try:
+                generate_preview(outname, preview_name, settings['thumb_video_delay'], settings, options=settings['jpg_options']);
+            except Exception:
+                if logger.getEffectiveLevel() == logging.DEBUG:
+                    raise
+                else:
+                    return Status.FAILURE
+
     if settings['symlink_originals']:
         symlink_name = os.path.join(outpath, get_original(settings, filename))
         if not isfile(symlink_name) or force:

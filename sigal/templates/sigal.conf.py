@@ -169,6 +169,9 @@ ignore_files = []
 # Size of resized video (default: (480, 360))
 # video_size = (480, 360)
 
+# Generate preview image for videos used by Photoswipe
+# video_previmage = True
+
 # -------------
 # Miscellaneous
 # -------------
