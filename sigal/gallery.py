@@ -46,7 +46,7 @@ from .settings import get_thumb
 from .utils import (Devnull, copy, check_or_create_dir, url_from_path,
                     read_markdown, cached_property, is_valid_html5_video,
                     get_mime)
-from .video import process_video
+from .video import process_video, get_vsize, get_video_length
 from .writer import Writer
 
 
@@ -203,6 +203,14 @@ class Video(Media):
             self.dst_path = join(settings['destination'], path, base + ext)
         else:
             self.mime = get_mime(ext)
+
+    @cached_property
+    def size(self):
+        return get_vsize(self.dst_path)
+
+    @cached_property
+    def video_length(self):
+        return get_video_length(self.dst_path)
 
 
 class Album(UnicodeMixin):

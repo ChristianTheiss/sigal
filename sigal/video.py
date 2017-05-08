@@ -79,6 +79,36 @@ def video_size(source):
     return x, y
 
 
+def get_vsize(file_path):
+    """Return video size (width and height)."""
+    width, height = video_size(file_path)
+    return {
+        'width': width,
+        'height': height
+    }
+
+
+def get_video_length(source):
+    """Return video length."""
+    ret, stdout, stderr = call_subprocess(['ffmpeg', '-i', source])
+    pattern = re.compile(r'Duration: ([0-9]+:[0-9]+:[0-9]+)')
+    match = pattern.search(stderr)
+
+    if match:
+        x = match.groups()[0]
+    else:
+        x = "00:00:00"
+
+    if "00:0" in x[:4]:
+        x = x[4:]
+    elif "00:" in x[:3]:
+        x = x[3:]
+    elif "0" in x[:1]:
+        x = x[1:]
+
+    return x
+
+
 def generate_video(source, outname, settings, options=None):
     """Video processor.
 
