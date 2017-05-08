@@ -27,10 +27,10 @@ import logging
 import os
 import re
 import shutil
-from os.path import splitext
+from os.path import isfile,splitext
 
 from . import image, utils
-from .settings import get_thumb, Status
+from .settings import get_thumb, get_original, Status
 from .utils import call_subprocess, is_valid_html5_video
 
 
@@ -216,5 +216,10 @@ def process_video(filepath, outpath, settings):
                 raise
             else:
                 return Status.FAILURE
+    if settings['symlink_originals']:
+        symlink_name = os.path.join(outpath, get_original(settings, filename))
+        if not isfile(symlink_name) or force:
+            logger.info('Symlinking video %s to %s', filepath, symlink_name)
+            utils.copy(filepath, symlink_name, True)
 
     return Status.SUCCESS

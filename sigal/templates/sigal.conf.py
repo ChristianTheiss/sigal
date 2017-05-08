@@ -71,6 +71,21 @@ img_size = (800, 600)
 #                'optimize': True,
 #                'progressive': True}
 
+# ----------------------
+# Symlink original files
+# ----------------------
+
+# If True, the original files are symlinked into the originals_dir subdirectory.
+# The original files can be downloaded using the share button in the image view.
+# symlink_originals = False
+
+# Subdirectory of the originals
+# originals_dir = 'originals'
+
+# Prefix and/or suffix for originals filenames (default: '')
+# originals_prefix = ''
+# originals_suffix = ''
+
 # --------------------
 # Thumbnail generation
 # --------------------
